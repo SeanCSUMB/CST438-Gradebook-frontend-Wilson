@@ -15,20 +15,22 @@ import {SERVER_URL} from '../constants.js'
 class Assignment extends Component {
     constructor(props) {
       super(props);
-      this.state = {selected: 0, rows: []};
+      this.state = {selected: 0, rows: [], userType: 0};
     };
  
    componentDidMount() {
     this.fetchAssignments();
+    this.getUserType();
   }
  
   fetchAssignments = () => {
     console.log("Assignment.fetchAssignments");
     const token = Cookies.get('XSRF-TOKEN');
-    fetch(`${SERVER_URL}/gradebook`, 
+    fetch(`${SERVER_URL}gradebook`, 
       {  
         method: 'GET', 
-        headers: { 'X-XSRF-TOKEN': token }
+        headers: { 'X-XSRF-TOKEN': token },
+        credentials: 'include'
       } )
     .then((response) => response.json()) 
     .then((responseData) => { 
@@ -40,6 +42,22 @@ class Assignment extends Component {
           position: toast.POSITION.BOTTOM_LEFT
         });
       }        
+    })
+    .catch(err => console.error(err)); 
+  }
+
+  getUserType = () => {
+    console.log("Assignment.getUserType");
+    const token = Cookies.get('XSRF-TOKEN');
+    fetch(`${SERVER_URL}verify`, 
+      {  
+        method: 'GET', 
+        headers: { 'X-XSRF-TOKEN': token },
+        credentials: 'include'
+      } )
+    .then((response) => response.json()) 
+    .then((responseData) => { 
+      this.setState( {userType: responseData});        
     })
     .catch(err => console.error(err)); 
   }
@@ -69,7 +87,8 @@ class Assignment extends Component {
         )
       },
       { field: 'courseTitle', headerName: 'Course', width: 300 },
-      { field: 'dueDate', headerName: 'Due Date', width: 200 }
+      { field: 'dueDate', headerName: 'Due Date', width: 200 },
+      { field: 'grade', headerName: 'Grade', width: 200 }
       ];
       return (
           <div align="left" >
@@ -78,11 +97,11 @@ class Assignment extends Component {
                     <DataGrid rows={this.state.rows} columns={columns} />
                   </div>                
                 <Button component={Link} to={{pathname:'/gradebook' , assignment: this.state.rows[this.state.selected]}} 
-                        variant="outlined" color="primary" disabled={this.state.rows.length==0}  style={{margin: 10}}>
+                        variant="outlined" color="primary" disabled={this.state.rows.length==0 || this.state.userType===0}  style={{margin: 10}}>
                   Grade
                 </Button>
                 <Button component={Link} to={{pathname:'/NewAssignment' , assignment: this.state.rows[this.state.selected]}} 
-                        variant="outlined" color="primary" style={{margin: 10}}>
+                        variant="outlined" color="primary" disabled={this.state.userType===0} style={{margin: 10}}>
                   Add New Assignment
                 </Button>
           </div>
