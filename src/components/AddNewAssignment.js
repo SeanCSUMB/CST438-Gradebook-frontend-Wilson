@@ -40,10 +40,11 @@ class AddNewAssignment extends Component {
 	  this.courseId = parseInt(this.courseId);
 	  
 	  ///?courseId=id&name=name&due=date
-      fetch(`${SERVER_URL}/gradebook/?courseId=${this.state.courseId}&name=${this.state.name}&due=${this.state.date}` , 
+      fetch(`${SERVER_URL}gradebook/?courseId=${this.state.courseId}&name=${this.state.name}&due=${this.state.date}` , 
           {  
           method: 'POST', 
-          headers: { 'X-XSRF-TOKEN': token }
+          headers: { 'X-XSRF-TOKEN': token},
+          credentials: 'include'
 		} )
       .then(res => {
           if (res.ok) {
